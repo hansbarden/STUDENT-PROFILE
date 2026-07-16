@@ -1,4 +1,6 @@
 import streamlit as st
+import base64
+import os
 
 # ==============================================================================
 # 1. PAGE CONFIGURATION
@@ -9,6 +11,24 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# ==============================================================================
+# 1.5 LOCAL ASSETS & BASE64 ENCODING SYSTEM
+# ==============================================================================
+# Helper function to safely load and convert local images to Base64
+def get_image_base64(relative_path):
+    if os.path.exists(relative_path):
+        with open(relative_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode()
+    return None
+
+# Convert your local images from 'images' folder
+pf_base64 = get_image_base64("images/pf.jpg")
+p1_base64 = get_image_base64("images/p1.jpg")
+
+# Set dynamic sources with placeholders as safe fallbacks
+pf_src = f"data:image/jpeg;base64,{pf_base64}" if pf_base64 else "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=350&h=350"
+p1_src = f"data:image/jpeg;base64,{p1_base64}" if p1_base64 else "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=600"
 
 # ==============================================================================
 # 2. PREMIUM GLASSMORPHISM & ANIMATED GRADIENT STYLING (CSS)
@@ -363,12 +383,12 @@ col1, col2 = st.columns([1, 2], gap="large")
 # 5. LEFT COLUMN: PROFILE CARD, IDOL & HOBBIES
 # ==============================================================================
 with col1:
-    # Student Bio Card
+    # Student Bio Card (Injects the Local Profile Picture Source: pf_src)
     st.markdown(
-        """
+        f"""
         <div class="glass-card" style="text-align: center;">
             <div class="profile-pic-container">
-                <img class="profile-pic" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=350&h=350" alt="Student Profile" width="180px" height="180px">
+                <img class="profile-pic" src="{pf_src}" alt="Student Profile" width="180px" height="180px">
             </div>
             <h3 style="margin-bottom: 0.25rem;">Junior Heri Farid</h3>
             <p style="color: #38bdf8; font-size: 0.9rem; margin-bottom: 1rem; font-weight: 500;">MZA/BAC/2528041</p>
@@ -439,15 +459,17 @@ with col2:
     # Using columns for responsive gallery styling
     img_col1, img_col2 = st.columns(2)
     with img_col1:
+        # Left Image (Injects the Local Gallery Photo Source: p1_src)
         st.markdown(
-            """
+            f"""
             <div style="border-radius:15px; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
-                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=600" alt="College Campus Life" style="width: 100%; height: 180px; object-fit: cover; display:block;">
+                <img src="{p1_src}" alt="College Campus Life" style="width: 100%; height: 180px; object-fit: cover; display:block;">
             </div>
             """,
             unsafe_allow_html=True
         )
     with img_col2:
+        # Right Image (Keeps original Unsplash computer image for balance, but you can swap it similarly later!)
         st.markdown(
             """
             <div style="border-radius:15px; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
@@ -468,8 +490,17 @@ with col2:
         """,
         unsafe_allow_html=True
     )
-    # 16:9 YouTube video embed
-    st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    
+    # 16:9 Video Embed Loader System (Injects local video 'v.mp4' from 'video' folder)
+    video_path = "video/v.mp4"
+    if os.path.exists(video_path):
+        with open(video_path, "rb") as video_file:
+            video_bytes = video_file.read()
+        st.video(video_bytes)
+    else:
+        # Dynamic safe fallback if folder setup is incomplete
+        st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        
     st.markdown("</div></div>", unsafe_allow_html=True)
 
     # Links Card (Social Media & Useful Links Combined)
